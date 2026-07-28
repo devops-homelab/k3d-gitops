@@ -12,10 +12,9 @@ spec:
     repoURL: https://charts.bitnami.com/bitnami
     targetRevision: 2.1.3
     chart: sealed-secrets
-  - repoURL: "https://github.com/devops-homelab/k3d-gitops/"
+  - repoURL: https://github.com/devops-homelab/k3d-gitops
     targetRevision: main
     ref: values
-    path: charts/infra/sealed-secrets
   destination:
     server: https://kubernetes.default.svc
     namespace: sealed-secrets
