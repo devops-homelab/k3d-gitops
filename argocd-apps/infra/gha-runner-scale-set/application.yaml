@@ -30,4 +30,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
   revisionHistoryLimit: 3
