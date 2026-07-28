@@ -1,0 +1,44 @@
+# Values for gha-runner-scale-set chart.
+# Update githubConfigUrl to your org or repo URL and create secret "github-auth" in arc-runners.
+# For GitHub App auth, the secret must contain:
+# - github_app_id
+# - github_app_installation_id
+# - github_app_private_key
+
+githubConfigUrl: https://github.com/devops-homelab
+githubConfigSecret: github-auth
+
+runnerScaleSetName: k3d-gha-runners
+
+# Optional labels visible in GitHub when jobs target a self-hosted runner.
+# runnerGroup can be used if you want to isolate this scale set in a group.
+# runnerGroup: Default
+runnerLabels:
+  - self-hosted
+  - linux
+  - x64
+  - k3d
+
+# Keep a small floor and cap for local clusters.
+minRunners: 0
+maxRunners: 3
+
+controllerServiceAccount:
+  namespace: arc-system
+  name: gha-runner-scale-set-controller
+
+# Example runner pod template.
+template:
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command:
+          - /home/runner/run.sh
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi

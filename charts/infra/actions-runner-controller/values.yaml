@@ -1,0 +1,11 @@
+# Values for gha-runner-scale-set-controller chart.
+# Keep this minimal unless you need custom node selectors/resources/tolerations.
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

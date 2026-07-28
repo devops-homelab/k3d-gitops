@@ -1,0 +1,58 @@
+# Sealed Secrets Controller configuration
+controller:
+  replicaCount: 1  # Number of Sealed Secrets Controller replicas
+  image:
+    repository: quay.io/bitnami/sealed-secrets
+    tag: v0.16.0  # Use the appropriate version you want
+    pullPolicy: IfNotPresent
+  installCRDs: true  # This ensures CRDs (Custom Resource Definitions) are installed if not already present
+
+# Image pull secrets (if required for private repositories)
+# imagePullSecrets:
+#   - name: my-registry-secret
+
+# Service account configuration
+serviceAccount:
+  create: true
+  name: sealed-secrets-operator  # Name of the service account
+
+# RBAC Configuration
+rbac:
+  create: true  # Automatically create the necessary RBAC resources (role, role binding)
+
+# Pod security policies
+podSecurityPolicy:
+  enabled: false  # Set to true if you need to enable Pod Security Policies
+
+# Sealed Secrets API server (optional - if you're customizing API server)
+apiServer:
+  replicaCount: 1
+  image:
+    repository: quay.io/bitnami/sealed-secrets-apiserver
+    tag: v0.16.0
+    pullPolicy: IfNotPresent
+
+# Resources for the operator (adjust based on your cluster's capacity)
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Affinity and nodeSelector for deployment (optional, based on your cluster's configuration)
+affinity: {}
+nodeSelector: {}
+tolerations: []
+
+# Enable/disable the creation of secrets for testing purposes (useful for dev environments)
+testing:
+  createSecrets: false  # This will prevent the creation of default sealed secrets during testing
+
+# Ingress configuration (optional if you need external access to the API server)
+ingress:
+  enabled: false
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "0"
