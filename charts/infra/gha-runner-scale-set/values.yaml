@@ -25,7 +25,7 @@ maxRunners: 3
 
 controllerServiceAccount:
   namespace: arc-system
-  name: gha-runner-scale-set-controller
+  name: actions-runner-controller-gha-rs-controller
 
 # Example runner pod template.
 template:
