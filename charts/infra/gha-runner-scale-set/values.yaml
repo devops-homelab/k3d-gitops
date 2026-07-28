@@ -5,7 +5,7 @@
 # - github_app_installation_id
 # - github_app_private_key
 
-githubConfigUrl: https://github.com/devops-homelab/k3d-gitops
+githubConfigUrl: https://github.com/devops-homelab
 githubConfigSecret: github-auth
 
 runnerScaleSetName: k3d-gha-runners
