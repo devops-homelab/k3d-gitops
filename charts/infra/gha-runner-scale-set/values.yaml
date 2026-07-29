@@ -18,6 +18,7 @@ runnerLabels:
   - linux
   - x64
   - k3d
+  - k3d-gha-runners
 
 # Keep a small floor and cap for local clusters.
 minRunners: 0
