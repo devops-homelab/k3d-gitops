@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    runs-on: k3d
+    runs-on: k3d-gha-runners
     
     steps:
       - name: Checkout code
