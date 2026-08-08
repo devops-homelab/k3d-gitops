@@ -1,0 +1,27 @@
+apiVersion: delivery.kokumi.dev/v1alpha1
+kind: Order
+metadata:
+  name: podinfo
+  namespace: microservices
+spec:
+  source:
+    oci: oci://ghcr.io/stefanprodan/charts/podinfo
+    version: "6.10.2"
+  render:
+    helm:
+      namespace: microservices
+      values:
+        replicaCount: 1
+        service:
+          type: ClusterIP
+          port: 9898
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+  destination:
+    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
+  autoDeploy: Enabled
