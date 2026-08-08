@@ -5,12 +5,17 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/devops-homelab/k3d-gitops
-    targetRevision: main
-    path: charts/microservices/podinfo
-    directory:
-      include: "order.yaml"
+  sources:
+    # Kokumi Order
+    - repoURL: https://github.com/devops-homelab/k3d-gitops
+      targetRevision: main
+      path: charts/microservices/podinfo
+      directory:
+        include: "order.yaml"
+    # GHCR Pantry & credentials (referenced by Order)
+    - repoURL: https://github.com/devops-homelab/k3d-gitops
+      targetRevision: main
+      path: argocd-apps/microservices/pantries
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices
