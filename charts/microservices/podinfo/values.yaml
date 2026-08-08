@@ -1,0 +1,14 @@
+# Reference values for podinfo deployment
+# Actual values are inline in order.yaml
+image:
+  repository: ghcr.io/stefanprodan/podinfo
+  tag: "6.10.2"
+
+service:
+  port: 9898
+
+env:
+  - name: PODINFO_UI_MESSAGE
+    value: "Hello from k3d"
+  - name: PODINFO_UI_COLOR
+    value: "#EF6461"

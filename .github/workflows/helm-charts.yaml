@@ -1,0 +1,77 @@
+name: Package and Push Helm Charts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  CHARTS_PATH: charts/microservices
+
+jobs:
+  package-and-push:
+    runs-on: k3d-gha-runners
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GH_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Package and push charts
+        run: |
+          mkdir -p /tmp/charts
+          for chart_dir in ${{ env.CHARTS_PATH }}/*/; do
+            # Skip if no Chart.yaml
+            if [[ ! -f "${chart_dir}Chart.yaml" ]]; then
+              echo "Skipping ${chart_dir} - no Chart.yaml"
+              continue
+            fi
+
+            # Get chart name and type from Chart.yaml
+            chart_name=$(yq '.name' "${chart_dir}Chart.yaml")
+            chart_version=$(yq '.version' "${chart_dir}Chart.yaml")
+            chart_type=$(yq '.type // "application"' "${chart_dir}Chart.yaml")
+
+            # Skip library charts
+            if [[ "$chart_type" == "library" ]]; then
+              echo "Skipping library chart: $chart_name"
+              continue
+            fi
+
+            echo "Processing chart: $chart_name (v$chart_version)"
+
+            # Update dependencies if Chart.yaml has them
+            if yq -e '.dependencies' "${chart_dir}Chart.yaml" > /dev/null 2>&1; then
+              helm dependency update "$chart_dir"
+            fi
+
+            # Package
+            helm package "$chart_dir" --destination /tmp/charts
+
+            # Push to GHCR (use chart name from Chart.yaml, not folder name)
+            helm push "/tmp/charts/${chart_name}-${chart_version}.tgz" \
+              oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
+          done
+
+      - name: Summary
+        run: |
+          echo "## Pushed Charts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for tgz in /tmp/charts/*.tgz; do
+            if [[ -f "$tgz" ]]; then
+              name=$(basename "$tgz" .tgz)
+              echo "- \`oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts/${name}\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

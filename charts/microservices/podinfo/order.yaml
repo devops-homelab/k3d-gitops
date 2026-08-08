@@ -5,23 +5,23 @@ metadata:
   namespace: microservices
 spec:
   source:
-    oci: oci://ghcr.io/stefanprodan/charts/podinfo
-    version: "6.10.2"
+    oci: oci://ghcr.io/devops-homelab/charts/microservice
+    version: "0.1.0"
   render:
     helm:
+      releaseName: podinfo
       namespace: microservices
       values:
-        replicaCount: 1
+        image:
+          repository: ghcr.io/stefanprodan/podinfo
+          tag: "6.10.2"
         service:
-          type: ClusterIP
           port: 9898
-        resources:
-          requests:
-            cpu: 10m
-            memory: 32Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
+        env:
+          - name: PODINFO_UI_MESSAGE
+            value: "Hello from k3d"
+          - name: PODINFO_UI_COLOR
+            value: "#EF6461"
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
   autoDeploy: Enabled

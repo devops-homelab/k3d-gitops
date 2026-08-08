@@ -9,6 +9,8 @@ spec:
     repoURL: https://github.com/devops-homelab/k3d-gitops
     targetRevision: main
     path: charts/microservices/podinfo
+    directory:
+      include: "order.yaml"
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices
