@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'charts/microservices/**'
+      - 'charts/microservices/common/**'
   workflow_dispatch:
 
 env:

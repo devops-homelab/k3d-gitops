@@ -1,28 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: podinfo-dev-order
+  name: microservices-qa
   namespace: argocd
 spec:
   project: default
   sources:
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
-      path: charts/microservices/podinfo
-      directory:
-        include: "order-dev.yaml"
+      path: charts/microservices/qa
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
       path: argocd-apps/infra/kokumi-configs/pantries
       directory:
-        include: "*-dev.*"
+        include: "*-qa.*"
   destination:
     server: https://kubernetes.default.svc
-    namespace: microservices-dev
+    namespace: microservices-qa
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true
   revisionHistoryLimit: 3
