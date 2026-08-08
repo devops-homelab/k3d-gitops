@@ -25,4 +25,3 @@ spec:
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
   autoDeploy: Enabled
-
