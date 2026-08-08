@@ -15,7 +15,7 @@ spec:
     # GHCR Pantry & credentials
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
-      path: argocd-apps/microservices/pantries
+      path: argocd-apps/infra/kokumi-configs/pantries
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices
