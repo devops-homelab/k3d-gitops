@@ -12,17 +12,8 @@ spec:
     helm:
       releaseName: podinfo
       namespace: microservices
-      values:
-        image:
-          repository: ghcr.io/stefanprodan/podinfo
-          tag: "6.10.2"
-        service:
-          port: 9898
-        env:
-          - name: PODINFO_UI_MESSAGE
-            value: "Hello from k3d"
-          - name: PODINFO_UI_COLOR
-            value: "#EF6461"
+      valuesFrom:
+        - path: charts/microservices/podinfo/values.yaml
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
   autoDeploy: Enabled

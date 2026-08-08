@@ -1,5 +1,5 @@
-# Reference values for podinfo deployment
-# Actual values are inline in order.yaml
+# Podinfo values for Kokumi Order rendering
+# Referenced in order.yaml via valuesFrom
 image:
   repository: ghcr.io/stefanprodan/podinfo
   tag: "6.10.2"
