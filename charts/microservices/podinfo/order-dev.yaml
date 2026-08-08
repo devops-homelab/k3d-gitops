@@ -9,6 +9,7 @@ spec:
   render:
     helm:
       releaseName: podinfo
+      namespace: microservices-dev
       values:
         image:
           repository: ghcr.io/stefanprodan/podinfo
