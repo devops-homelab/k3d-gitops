@@ -2,7 +2,7 @@ apiVersion: delivery.kokumi.dev/v1alpha1
 kind: Order
 metadata:
   name: podinfo
-  namespace: microservices
+  namespace: microservices-qa
 spec:
   menuRef:
     name: ghcr-microservice
@@ -17,8 +17,8 @@ spec:
           port: 9898
         env:
           - name: PODINFO_UI_MESSAGE
-            value: "Hello from k3d"
+            value: "Hello from k3d QA"
           - name: PODINFO_UI_COLOR
-            value: "#EF6461"
+            value: "#2196F3"
   destination:
-    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
+    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-qa

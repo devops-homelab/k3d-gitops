@@ -1,24 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: podinfo-order
+  name: podinfo-dev
   namespace: argocd
 spec:
   project: default
   sources:
-    # Kokumi Order
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
       path: charts/microservices/podinfo
       directory:
-        include: "order.yaml"
-    # GHCR Pantry & credentials
+        include: "order-dev.yaml"
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
       path: argocd-apps/infra/kokumi-configs/pantries
+      directory:
+        include: "*-dev.*"
   destination:
     server: https://kubernetes.default.svc
-    namespace: microservices
+    namespace: microservices-dev
   syncPolicy:
     automated:
       prune: true

@@ -2,7 +2,7 @@ apiVersion: delivery.kokumi.dev/v1alpha1
 kind: Pantry
 metadata:
   name: ghcr-microservice
-  namespace: microservices
+  namespace: microservices-qa
 spec:
   url: oci://ghcr.io/devops-homelab/charts/microservice
   secretRef:

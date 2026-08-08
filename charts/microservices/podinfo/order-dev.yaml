@@ -1,0 +1,24 @@
+apiVersion: delivery.kokumi.dev/v1alpha1
+kind: Order
+metadata:
+  name: podinfo
+  namespace: microservices-dev
+spec:
+  menuRef:
+    name: ghcr-microservice
+  render:
+    helm:
+      releaseName: podinfo
+      values:
+        image:
+          repository: ghcr.io/stefanprodan/podinfo
+          tag: "6.10.2"
+        service:
+          port: 9898
+        env:
+          - name: PODINFO_UI_MESSAGE
+            value: "Hello from k3d DEV"
+          - name: PODINFO_UI_COLOR
+            value: "#EF6461"
+  destination:
+    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-dev
