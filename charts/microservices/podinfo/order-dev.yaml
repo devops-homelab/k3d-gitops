@@ -22,3 +22,4 @@ spec:
             value: "#EF6461"
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-dev
+  autoDeploy: Enabled

@@ -22,3 +22,4 @@ spec:
             value: "#2196F3"
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-qa
+  autoDeploy: Enabled
