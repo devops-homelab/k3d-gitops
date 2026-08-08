@@ -1,14 +1,14 @@
 apiVersion: delivery.kokumi.dev/v1alpha1
 kind: Order
 metadata:
-  name: podinfo
+  name: podinfo-qa
   namespace: microservices-qa
 spec:
   menuRef:
     name: ghcr-microservice
   render:
     helm:
-      releaseName: podinfo
+      releaseName: podinfo-qa
       namespace: microservices-qa
       values:
         image:
