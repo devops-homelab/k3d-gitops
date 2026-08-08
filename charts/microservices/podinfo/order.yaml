@@ -5,7 +5,8 @@ metadata:
   namespace: microservices
 spec:
   source:
-    oci: oci://ghcr.io/devops-homelab/charts/microservice
+    pantryRef:
+      name: ghcr-microservice
     version: "0.1.0"
   render:
     helm:
@@ -25,4 +26,3 @@ spec:
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
   autoDeploy: Enabled
-  
