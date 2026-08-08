@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: podinfo-qa
+  name: podinfo-qa-order
   namespace: argocd
 spec:
   project: default
