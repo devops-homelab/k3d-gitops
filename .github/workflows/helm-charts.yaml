@@ -27,8 +27,10 @@ jobs:
 
       - name: Install yq
         run: |
-          curl -sL https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -o /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
+          mkdir -p $HOME/.local/bin
+          curl -sL https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64 -o $HOME/.local/bin/yq
+          chmod +x $HOME/.local/bin/yq
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Login to GHCR
         run: |
