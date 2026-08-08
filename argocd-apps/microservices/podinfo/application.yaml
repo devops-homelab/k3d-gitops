@@ -12,10 +12,14 @@ spec:
       path: charts/microservices/podinfo
       directory:
         include: "order.yaml"
-    # GHCR Pantry & credentials (referenced by Order)
+    # GHCR Pantry & credentials
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
       path: argocd-apps/microservices/pantries
+    # Cluster-scoped Menus (templates)
+    - repoURL: https://github.com/devops-homelab/k3d-gitops
+      targetRevision: main
+      path: argocd-apps/microservices/menus
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices

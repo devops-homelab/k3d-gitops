@@ -4,14 +4,11 @@ metadata:
   name: podinfo
   namespace: microservices
 spec:
-  source:
-    pantryRef:
-      name: ghcr-microservice
-    version: "0.1.0"
+  menuRef:
+    name: ghcr-microservice
   render:
     helm:
       releaseName: podinfo
-      namespace: microservices
       values:
         image:
           repository: ghcr.io/stefanprodan/podinfo
@@ -25,4 +22,3 @@ spec:
             value: "#EF6461"
   destination:
     oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo
-  autoDeploy: Enabled

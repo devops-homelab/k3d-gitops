@@ -1,0 +1,20 @@
+apiVersion: delivery.kokumi.dev/v1alpha1
+kind: Menu
+metadata:
+  name: ghcr-microservice
+spec:
+  source:
+    pantryRef:
+      name: ghcr-microservice
+      namespace: microservices
+    version: "0.1.0"
+  render:
+    helm:
+      namespace: microservices
+  overrides:
+    values:
+      policy: All
+    patches:
+      policy: All
+  defaults:
+    autoDeploy: Enabled
