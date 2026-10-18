@@ -6,9 +6,22 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 service:
   type: ClusterIP
   port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: microservice.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
 
 resources:
   requests:

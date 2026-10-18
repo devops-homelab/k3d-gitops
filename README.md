@@ -35,6 +35,59 @@ charts/
 
 ## Argo CD Apps
 
+### Dev Microservice
+- App manifest: [argocd-apps/microservices/dev/application.yaml](argocd-apps/microservices/dev/application.yaml)
+- Shared Helm chart: [charts/microservices/common](charts/microservices/common)
+- Dev values: [charts/microservices/dev/values.yaml](charts/microservices/dev/values.yaml)
+
+The dev app deploys `k3d-microservice` into `microservices-dev` using a pinned
+Docker Hub image tag. Update `image.tag` in the dev values after publishing a new
+image. Both health probes use `/health`.
+
+Dev uses `imagePullSecrets: [{name: dockerhub-secret}]` for authenticated Docker
+Hub pulls. Create this Secret in `microservices-dev` before syncing the app.
+Use a Docker Hub access token with read-only permission, not your password.
+GitHub Actions secrets are not automatically available to Kubernetes.
+
+Run the following in Bash locally (the token is prompted without echoing it or
+putting its literal value in shell history):
+
+```bash
+kubectl create namespace microservices-dev --dry-run=client -o yaml | kubectl apply -f -
+read -r -s -p "Docker Hub read-only token: " DOCKERHUB_TOKEN
+printf '\n'
+kubectl -n microservices-dev create secret docker-registry dockerhub-secret \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=navindujay \
+  --docker-password="$DOCKERHUB_TOKEN" \
+  --dry-run=client -o yaml | kubectl apply -f -
+unset DOCKERHUB_TOKEN
+```
+
+Do not commit the token or an unencrypted Secret manifest. If managing the
+credential through GitOps, use Sealed Secrets. The shared chart defaults to
+`imagePullSecrets: []`, so other deployments can still pull public images without
+authentication.
+
+Ingress is disabled by default in the shared chart. Dev enables it with the
+`traefik` class and routes `http://microservice.localhost/` to the service on port
+8080. The chart supports ingress annotations, multiple hosts/paths, and TLS via
+`ingress.tls` (a list of `secretName` and `hosts` entries); provision TLS secrets
+separately.
+
+Push these changes and sync `microservices-dev` in Argo CD. Traefik must be
+installed, and its HTTP port must be exposed from k3d to your laptop. If you map
+it to a port other than 80, include that port in the URL. If the hostname does
+not resolve locally, map `microservice.localhost` to `127.0.0.1` in your hosts file.
+
+Validate the dev chart locally:
+
+```bash
+helm lint charts/microservices/common -f charts/microservices/dev/values.yaml
+helm template k3d-microservice charts/microservices/common \
+  -n microservices-dev -f charts/microservices/dev/values.yaml
+```
+
 ### Sealed Secrets
 - App manifest: argocd-apps/infra/sealed-secrets/application.yaml
 - Values: charts/infra/sealed-secrets/values.yaml

@@ -8,7 +8,11 @@ spec:
   source:
     repoURL: https://github.com/devops-homelab/k3d-gitops
     targetRevision: main
-    path: charts/microservices/dev
+    path: charts/microservices/common
+    helm:
+      releaseName: k3d-microservice
+      valueFiles:
+        - ../dev/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices-dev

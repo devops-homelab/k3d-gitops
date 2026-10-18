@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: navindujay/k3d-microservice
+  tag: "4691710ee11d68a5b72e26bbc55d1006ab190460"
+
+imagePullSecrets:
+  - name: dockerhub-secret
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: microservice.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+probes:
+  readiness:
+    path: /health
+  liveness:
+    path: /health
