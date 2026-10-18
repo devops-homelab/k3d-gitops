@@ -54,6 +54,11 @@ Important sync options are enabled in the app to handle large CRDs:
 - Values: charts/infra/gha-runner-scale-set/values.yaml
 - Extra resource source: argocd-apps/infra/gha-runner-scale-set/resources
 
+The runner scale set enables `containerMode.type: dind`. ARC adds a Docker-in-Docker
+daemon and configures the runner's Docker connection so workflows can use Docker
+Buildx to build and push images. This uses a privileged container; run only trusted
+workflows on this runner scale set.
+
 ## GitHub App Authentication
 
 The runner scale set uses:
@@ -117,6 +122,20 @@ kubectl -n arc-system logs deploy/actions-runner-controller-gha-rs-controller --
 
 ## Common Issues
 
+### Docker Buildx cannot connect to /var/run/docker.sock
+The runner needs a Docker daemon, not just the Docker CLI. Keep
+`containerMode.type: dind` in the runner scale set values and sync the
+`gha-runner-scale-set` Argo CD application after pushing the change.
+Wait for replacement runner pods before rerunning the failed workflow.
+The cluster must allow privileged containers in `arc-runners`.
+
+To check that Docker is available in a replacement runner:
+
+```bash
+kubectl -n arc-runners get pods
+kubectl -n arc-runners exec <runner-pod> -c runner -- docker info
+```
+
 ### SharedResourceWarning for github-auth
 If Argo reports that SealedSecret/github-auth is owned by multiple apps, ensure your root app-of-apps only includes application manifests (for example with directory include pattern **/application.yaml).
 
@@ -142,4 +161,3 @@ If githubConfigUrl is repo-level (https://github.com/<org>/<repo>):
 - Committing SealedSecret manifests is expected and safe.
 
 ---
-

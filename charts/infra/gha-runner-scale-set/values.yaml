@@ -28,6 +28,9 @@ controllerServiceAccount:
   namespace: arc-system
   name: actions-runner-controller-gha-rs-controller
 
+containerMode:
+  type: dind
+
 # Example runner pod template.
 template:
   spec:
