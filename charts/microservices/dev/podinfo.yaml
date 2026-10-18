@@ -1,26 +1,55 @@
-apiVersion: delivery.kokumi.dev/v1alpha1
-kind: Order
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo-dev
+  namespace: microservices-dev
+  labels:
+    app: podinfo-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podinfo-dev
+  template:
+    metadata:
+      labels:
+        app: podinfo-dev
+    spec:
+      containers:
+        - name: podinfo-dev
+          image: ghcr.io/stefanprodan/podinfo:6.10.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9898
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: "Hello from k3d DEV"
+            - name: PODINFO_UI_COLOR
+              value: "#EF6461"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
 metadata:
   name: podinfo-dev
   namespace: microservices-dev
 spec:
-  menuRef:
-    name: ghcr-microservice
-  render:
-    helm:
-      releaseName: podinfo-dev
-      namespace: microservices-dev
-      values:
-        image:
-          repository: ghcr.io/stefanprodan/podinfo
-          tag: "6.10.2"
-        service:
-          port: 9898
-        env:
-          - name: PODINFO_UI_MESSAGE
-            value: "Hello from k3d DEV"
-          - name: PODINFO_UI_COLOR
-            value: "#EF6461"
-  destination:
-    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-dev
-  autoDeploy: Enabled
+  type: ClusterIP
+  selector:
+    app: podinfo-dev
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http

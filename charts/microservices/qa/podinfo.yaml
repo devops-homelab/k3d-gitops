@@ -1,26 +1,55 @@
-apiVersion: delivery.kokumi.dev/v1alpha1
-kind: Order
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo-qa
+  namespace: microservices-qa
+  labels:
+    app: podinfo-qa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podinfo-qa
+  template:
+    metadata:
+      labels:
+        app: podinfo-qa
+    spec:
+      containers:
+        - name: podinfo-qa
+          image: ghcr.io/stefanprodan/podinfo:6.10.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 9898
+          env:
+            - name: PODINFO_UI_MESSAGE
+              value: "Hello from k3d QA"
+            - name: PODINFO_UI_COLOR
+              value: "#2196F3"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
 metadata:
   name: podinfo-qa
   namespace: microservices-qa
 spec:
-  menuRef:
-    name: ghcr-microservice
-  render:
-    helm:
-      releaseName: podinfo-qa
-      namespace: microservices-qa
-      values:
-        image:
-          repository: ghcr.io/stefanprodan/podinfo
-          tag: "6.10.2"
-        service:
-          port: 9898
-        env:
-          - name: PODINFO_UI_MESSAGE
-            value: "Hello from k3d QA"
-          - name: PODINFO_UI_COLOR
-            value: "#2196F3"
-  destination:
-    oci: oci://kokumi-registry.kokumi.svc.cluster.local:5000/preparation/podinfo-qa
-  autoDeploy: Enabled
+  type: ClusterIP
+  selector:
+    app: podinfo-qa
+  ports:
+    - name: http
+      port: 9898
+      targetPort: http

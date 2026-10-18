@@ -5,15 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  sources:
-    - repoURL: https://github.com/devops-homelab/k3d-gitops
-      targetRevision: main
-      path: charts/microservices/dev
-    - repoURL: https://github.com/devops-homelab/k3d-gitops
-      targetRevision: main
-      path: argocd-apps/infra/kokumi-configs/pantries
-      directory:
-        include: "*-dev.*"
+  source:
+    repoURL: https://github.com/devops-homelab/k3d-gitops
+    targetRevision: main
+    path: charts/microservices/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices-dev
