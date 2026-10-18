@@ -21,7 +21,7 @@ runnerLabels:
   - k3d-gha-runners
 
 # Keep a small floor and cap for local clusters.
-minRunners: 0
+minRunners: 1
 maxRunners: 3
 
 controllerServiceAccount:
