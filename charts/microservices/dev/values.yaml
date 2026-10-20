@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: navindujay/k3d-microservice
-  tag: "bfc1f055e8b9b80788b45cff1a912cb399ac8cee"
+  tag: "7bea905a94cfcdfefee0f978606e3d596bcd8819"
 
 imagePullSecrets:
   - name: dockerhub-secret
