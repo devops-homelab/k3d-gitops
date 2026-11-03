@@ -187,9 +187,10 @@ health probes remain unauthenticated. Store `app-username`, `app-password`, and
 The Argo app includes this resource directory. Use a unique random password for
 the browser and a different strong random token in the iPhone Shortcut's
 Authorization header. The API parses the supported NTB debit message but stores
-only the merchant, amount, date, and category; it does not store the SMS,
-account number, or current balance. Identical imports are deduplicated,
-including the existing LKR 29,856.00 life-insurance entry.
+the full SMS as the transaction description. The message's masked account
+number and current balance are stored in SQLite so you can identify the payment
+before changing its category. Identical imports are deduplicated, including the
+existing LKR 29,856.00 life-insurance entry.
 
 Create the SealedSecret manifest from zsh without putting credentials in shell
 history or passing them as process arguments:
