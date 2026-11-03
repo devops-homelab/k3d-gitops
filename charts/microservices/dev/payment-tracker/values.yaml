@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: "navindujay/k3d-payment-tracker"
-  tag: "defbb547f554ad3d9712b04b8f04167caaf9fa6e"
+  tag: "979bf97d2cf799366c2db56f81fe313ceb02ceaa"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
