@@ -26,3 +26,29 @@ probes:
     path: /healthz
   liveness:
     path: /healthz
+
+env:
+  - name: DB_PATH
+    value: /data/daybook.db
+  - name: API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: payment-tracker-api
+        key: api-token
+        optional: true
+
+podSecurityContext:
+  fsGroup: 65532
+  fsGroupChangePolicy: OnRootMismatch
+
+persistence:
+  enabled: true
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+  mountPath: /data
+
+tailscaleIngress:
+  enabled: true
+  hostname: payment-tracker

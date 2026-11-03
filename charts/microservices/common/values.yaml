@@ -38,3 +38,18 @@ probes:
     path: /healthz
 
 env: []
+
+podSecurityContext: {}
+
+persistence:
+  enabled: false
+  claimName: ""
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+  mountPath: /data
+
+tailscaleIngress:
+  enabled: false
+  hostname: ""

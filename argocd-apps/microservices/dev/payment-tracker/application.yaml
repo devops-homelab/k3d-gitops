@@ -5,14 +5,19 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://github.com/devops-homelab/k3d-gitops
-    targetRevision: main
-    path: charts/microservices/common
-    helm:
-      releaseName: k3d-payment-tracker
-      valueFiles:
-        - ../dev/payment-tracker/values.yaml
+  sources:
+    - repoURL: https://github.com/devops-homelab/k3d-gitops
+      targetRevision: main
+      path: charts/microservices/common
+      helm:
+        releaseName: k3d-payment-tracker
+        valueFiles:
+          - ../dev/payment-tracker/values.yaml
+    - repoURL: https://github.com/devops-homelab/k3d-gitops
+      targetRevision: main
+      path: argocd-apps/microservices/dev/payment-tracker/resources
+      directory:
+        recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: microservices-dev

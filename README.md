@@ -96,8 +96,14 @@ helm template k3d-microservice charts/microservices/common \
 The payment tracker runs as `k3d-payment-tracker` in `microservices-dev` and is
 served at `http://payment-tracker.localhost/` through Traefik. It reuses the
 namespace's `dockerhub-secret` image pull credential and exposes `/healthz` for
-readiness and liveness probes. Argo CD discovers the application through the
-recursive root app configuration.
+readiness and liveness probes. SQLite data is stored in the `local-path` PVC
+`k3d-payment-tracker-data`, which Argo CD is configured not to prune. Argo CD
+discovers the application through the recursive root app configuration.
+
+When moving from the old browser-only release, open the new image once at the
+same local origin used before (for example, `http://payment-tracker.localhost:8088/`)
+to migrate non-demo browser entries into SQLite before switching to the
+Tailscale hostname. Browser storage is isolated by origin.
 
 The payment-tracker repository's GitHub Actions workflow publishes the image and
 updates its pinned tag in the dev values file. Validate the chart with:
@@ -107,6 +113,78 @@ helm lint charts/microservices/common \
 	-f charts/microservices/dev/payment-tracker/values.yaml
 helm template k3d-payment-tracker charts/microservices/common \
 	-n microservices-dev -f charts/microservices/dev/payment-tracker/values.yaml
+```
+
+### Private Tailscale Access
+The Tailscale Kubernetes Operator is installed by the Argo CD Application at
+`argocd-apps/infra/tailscale-operator/application.yaml`, pinned to chart
+`1.104.4`. It exposes the payment tracker only to your tailnet through the
+`tailscale` Ingress class; do not enable Tailscale Funnel for this app.
+
+Before pushing the GitOps changes, complete these one-time Tailscale setup
+steps:
+
+1. Enable MagicDNS and HTTPS certificates in your Tailscale admin console.
+2. Create an OAuth client with Services read/write, Devices Core read/write,
+	 and Auth Keys read/write scopes. Assign it `tag:k8s-operator`.
+3. Merge the `tagOwners` entries for `tag:k8s-operator` and `tag:k8s`, and the
+	 `autoApprovers.services` entry for `tag:k8s`, from Tailscale's Kubernetes
+	 Operator quickstart into your existing tailnet ACL policy.
+4. Seal the OAuth credentials into the resource path consumed by the Argo app.
+	 Enter the client ID and secret only at the terminal prompts; never commit a
+	 plaintext Secret:
+
+```bash
+read -r -p "Tailscale OAuth client ID: " TS_CLIENT_ID
+read -r -s -p "Tailscale OAuth client secret: " TS_CLIENT_SECRET
+printf '\n'
+kubectl create secret generic operator-oauth -n tailscale \
+	--from-literal=client_id="$TS_CLIENT_ID" \
+	--from-literal=client_secret="$TS_CLIENT_SECRET" \
+	--dry-run=client -o yaml |
+kubeseal --controller-name sealed-secrets-operator \
+	--controller-namespace sealed-secrets \
+	--name operator-oauth --namespace tailscale --format yaml \
+	> argocd-apps/infra/tailscale-operator/resources/operator-oauth-sealedsecret.yaml
+unset TS_CLIENT_ID TS_CLIENT_SECRET
+```
+
+The operator app is discovered by the existing root app. Once synced, Tailscale
+will provision a private HTTPS hostname for the app. Find it with:
+
+```bash
+kubectl -n microservices-dev get ingress k3d-payment-tracker-tailnet
+```
+
+Install and sign in to Tailscale on the iPhone using the same tailnet, then use
+the hostname shown in the Ingress `ADDRESS` field. The `payment-tracker` TLS
+host requests a name like `https://payment-tracker.<your-tailnet>.ts.net/`.
+
+### NTB SMS Import Secret
+The app's `/api/import/ntb` endpoint requires a bearer token. Generate a strong
+token and seal it as `payment-tracker-api` in `microservices-dev`; the key must
+be named `api-token`. Store the resulting SealedSecret at
+`argocd-apps/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml`.
+The Argo app includes this resource directory. Configure the same token in the
+iPhone Shortcut's Authorization header. The API parses the supported NTB debit
+message but stores only the merchant, amount, date, and category; it does not
+store the SMS, account number, or current balance. Identical imports are
+deduplicated, including the existing LKR 29,856.00 life-insurance entry.
+
+Create the API token Secret manifest without installing a plaintext Secret in
+the cluster or writing the token to shell history:
+
+```bash
+read -r -s -p "Daybook API token: " DAYBOOK_API_TOKEN
+printf '\n'
+kubectl create secret generic payment-tracker-api -n microservices-dev \
+	--from-literal=api-token="$DAYBOOK_API_TOKEN" \
+	--dry-run=client -o yaml |
+kubeseal --controller-name sealed-secrets-operator \
+	--controller-namespace sealed-secrets \
+	--name payment-tracker-api --namespace microservices-dev --format yaml \
+	> argocd-apps/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml
+unset DAYBOOK_API_TOKEN
 ```
 
 ### Sealed Secrets

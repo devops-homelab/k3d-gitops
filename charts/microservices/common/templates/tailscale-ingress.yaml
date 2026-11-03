@@ -1,0 +1,25 @@
+{{- if .Values.tailscaleIngress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-tailnet
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - {{ .Values.tailscaleIngress.hostname | quote }}
+  rules:
+    - host: {{ .Values.tailscaleIngress.hostname | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}

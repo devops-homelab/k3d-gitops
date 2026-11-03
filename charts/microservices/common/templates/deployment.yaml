@@ -15,9 +15,19 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.claimName | default (printf "%s-data" .Release.Name) }}
       {{- end }}
       containers:
         - name: {{ .Release.Name }}
@@ -29,6 +39,11 @@ spec:
           {{- with .Values.env }}
           env:
             {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath | quote }}
           {{- end }}
           readinessProbe:
             httpGet:
