@@ -134,19 +134,37 @@ steps:
 	 Enter the client ID and secret only at the terminal prompts; never commit a
 	 plaintext Secret:
 
-```bash
-read -r -p "Tailscale OAuth client ID: " TS_CLIENT_ID
-read -r -s -p "Tailscale OAuth client secret: " TS_CLIENT_SECRET
+```zsh
+set -o pipefail
+read -r "TS_CLIENT_ID?Tailscale OAuth client ID: "
+read -rs "TS_CLIENT_SECRET?Tailscale OAuth client secret: "
 printf '\n'
-kubectl create secret generic operator-oauth -n tailscale \
-	--from-literal=client_id="$TS_CLIENT_ID" \
-	--from-literal=client_secret="$TS_CLIENT_SECRET" \
+
+tmp_credentials=$(mktemp)
+chmod 600 "$tmp_credentials"
+printf 'client_id=%s\nclient_secret=%s\n' \
+	"$TS_CLIENT_ID" "$TS_CLIENT_SECRET" > "$tmp_credentials"
+unset TS_CLIENT_ID TS_CLIENT_SECRET
+
+sealed_file=argocd-apps/infra/tailscale-operator/resources/operator-oauth-sealedsecret.yaml
+seal_status=0
+if kubectl create secret generic operator-oauth -n tailscale \
+	--from-env-file="$tmp_credentials" \
 	--dry-run=client -o yaml |
 kubeseal --controller-name sealed-secrets-operator \
 	--controller-namespace sealed-secrets \
 	--name operator-oauth --namespace tailscale --format yaml \
-	> argocd-apps/infra/tailscale-operator/resources/operator-oauth-sealedsecret.yaml
-unset TS_CLIENT_ID TS_CLIENT_SECRET
+	> "$sealed_file"; then
+	printf 'Created %s\n' "$sealed_file"
+else
+	seal_status=$?
+	rm -f "$sealed_file"
+	printf 'Sealing failed; no manifest was kept.\n' >&2
+fi
+rm -f "$tmp_credentials"
+if [[ $seal_status -ne 0 ]]; then
+	false
+fi
 ```
 
 The operator app is discovered by the existing root app. Once synced, Tailscale
@@ -160,31 +178,53 @@ Install and sign in to Tailscale on the iPhone using the same tailnet, then use
 the hostname shown in the Ingress `ADDRESS` field. The `payment-tracker` TLS
 host requests a name like `https://payment-tracker.<your-tailnet>.ts.net/`.
 
-### NTB SMS Import Secret
-The app's `/api/import/ntb` endpoint requires a bearer token. Generate a strong
-token and seal it as `payment-tracker-api` in `microservices-dev`; the key must
-be named `api-token`. Store the resulting SealedSecret at
-`argocd-apps/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml`.
-The Argo app includes this resource directory. Configure the same token in the
-iPhone Shortcut's Authorization header. The API parses the supported NTB debit
-message but stores only the merchant, amount, date, and category; it does not
-store the SMS, account number, or current balance. Identical imports are
-deduplicated, including the existing LKR 29,856.00 life-insurance entry.
+### Payment Tracker Authentication
+The browser UI and transaction/recurring APIs require HTTP Basic Auth. The
+`/api/import/ntb` Shortcut endpoint uses a separate bearer token; Kubernetes
+health probes remain unauthenticated. Store `app-username`, `app-password`, and
+`api-token` in the `payment-tracker-api` SealedSecret at
+`charts/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml`.
+The Argo app includes this resource directory. Use a unique random password for
+the browser and a different strong random token in the iPhone Shortcut's
+Authorization header. The API parses the supported NTB debit message but stores
+only the merchant, amount, date, and category; it does not store the SMS,
+account number, or current balance. Identical imports are deduplicated,
+including the existing LKR 29,856.00 life-insurance entry.
 
-Create the API token Secret manifest without installing a plaintext Secret in
-the cluster or writing the token to shell history:
+Create the SealedSecret manifest from zsh without putting credentials in shell
+history or passing them as process arguments:
 
-```bash
-read -r -s -p "Daybook API token: " DAYBOOK_API_TOKEN
+```zsh
+set -o pipefail
+read -r "DAYBOOK_USERNAME?Daybook browser username: "
+read -rs "DAYBOOK_PASSWORD?Daybook browser password: "
+read -rs "DAYBOOK_API_TOKEN?Daybook Shortcut bearer token: "
 printf '\n'
+
+tmp_credentials=$(mktemp)
+chmod 600 "$tmp_credentials"
+printf 'app-username=%s\napp-password=%s\napi-token=%s\n' \
+	"$DAYBOOK_USERNAME" "$DAYBOOK_PASSWORD" "$DAYBOOK_API_TOKEN" > "$tmp_credentials"
+unset DAYBOOK_USERNAME DAYBOOK_PASSWORD DAYBOOK_API_TOKEN
+
+sealed_file=charts/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml
+seal_status=0
 kubectl create secret generic payment-tracker-api -n microservices-dev \
-	--from-literal=api-token="$DAYBOOK_API_TOKEN" \
+	--from-env-file="$tmp_credentials" \
 	--dry-run=client -o yaml |
 kubeseal --controller-name sealed-secrets-operator \
 	--controller-namespace sealed-secrets \
 	--name payment-tracker-api --namespace microservices-dev --format yaml \
-	> argocd-apps/microservices/dev/payment-tracker/resources/payment-tracker-api-sealedsecret.yaml
-unset DAYBOOK_API_TOKEN
+	> "$sealed_file"
+seal_status=$?
+rm -f "$tmp_credentials"
+if [[ $seal_status -ne 0 ]]; then
+	rm -f "$sealed_file"
+	printf 'Sealing failed; no manifest was kept.\n' >&2
+	false
+else
+	printf 'Created %s\n' "$sealed_file"
+fi
 ```
 
 ### Sealed Secrets

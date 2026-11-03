@@ -35,7 +35,16 @@ env:
       secretKeyRef:
         name: payment-tracker-api
         key: api-token
-        optional: true
+  - name: APP_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: payment-tracker-api
+        key: app-username
+  - name: APP_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: payment-tracker-api
+        key: app-password
 
 podSecurityContext:
   fsGroup: 65532

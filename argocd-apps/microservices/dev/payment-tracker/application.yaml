@@ -15,7 +15,7 @@ spec:
           - ../dev/payment-tracker/values.yaml
     - repoURL: https://github.com/devops-homelab/k3d-gitops
       targetRevision: main
-      path: argocd-apps/microservices/dev/payment-tracker/resources
+      path: charts/microservices/dev/payment-tracker/resources
       directory:
         recurse: true
   destination:
