@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k3d-payment-tracker
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/devops-homelab/k3d-gitops
+    targetRevision: main
+    path: charts/microservices/common
+    helm:
+      releaseName: k3d-payment-tracker
+      valueFiles:
+        - ../dev/payment-tracker/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: microservices-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  revisionHistoryLimit: 3

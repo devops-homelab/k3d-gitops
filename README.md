@@ -88,6 +88,27 @@ helm template k3d-microservice charts/microservices/common \
   -n microservices-dev -f charts/microservices/dev/values.yaml
 ```
 
+### Payment Tracker
+- App manifest: `argocd-apps/microservices/dev/payment-tracker/application.yaml`
+- Shared Helm chart: `charts/microservices/common`
+- Dev values: `charts/microservices/dev/payment-tracker/values.yaml`
+
+The payment tracker runs as `k3d-payment-tracker` in `microservices-dev` and is
+served at `http://payment-tracker.localhost/` through Traefik. It reuses the
+namespace's `dockerhub-secret` image pull credential and exposes `/healthz` for
+readiness and liveness probes. Argo CD discovers the application through the
+recursive root app configuration.
+
+The payment-tracker repository's GitHub Actions workflow publishes the image and
+updates its pinned tag in the dev values file. Validate the chart with:
+
+```bash
+helm lint charts/microservices/common \
+	-f charts/microservices/dev/payment-tracker/values.yaml
+helm template k3d-payment-tracker charts/microservices/common \
+	-n microservices-dev -f charts/microservices/dev/payment-tracker/values.yaml
+```
+
 ### Sealed Secrets
 - App manifest: argocd-apps/infra/sealed-secrets/application.yaml
 - Values: charts/infra/sealed-secrets/values.yaml

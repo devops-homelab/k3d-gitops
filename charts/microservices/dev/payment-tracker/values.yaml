@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: navindujay/k3d-payment-tracker
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: dockerhub-secret
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: payment-tracker.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+probes:
+  readiness:
+    path: /healthz
+  liveness:
+    path: /healthz
