@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: "navindujay/k3d-opensource-radar"
-  tag: "4378a15ebddc81d8d4bba68e336893b298c23aa8"
+  tag: "e0109022f5c7b56546a9b69de76415d7de6be8cc"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
