@@ -1,0 +1,35 @@
+replicaCount: 1
+
+image:
+  repository: "navindujay/k3d-opensource-radar"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: dockerhub-secret
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: opensource-radar.localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+probes:
+  readiness:
+    path: /
+  liveness:
+    path: /
+
+persistence:
+  enabled: false
+
+tailscaleIngress:
+  enabled: true
+  hostname: opensource-radar

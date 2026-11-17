@@ -21,6 +21,11 @@ argocd-apps/
 		sealed-secrets/
 			application.yaml
 	microservices/
+			dev/
+				payment-tracker/
+					application.yaml
+				opensource-radar/
+					application.yaml
 
 charts/
 	infra/
@@ -31,6 +36,12 @@ charts/
 		sealed-secrets/
 			values.yaml
 	microservices/
+			common/
+			dev/
+				payment-tracker/
+					values.yaml
+				opensource-radar/
+					values.yaml
 ```
 
 ## Argo CD Apps
@@ -113,6 +124,27 @@ helm lint charts/microservices/common \
 	-f charts/microservices/dev/payment-tracker/values.yaml
 helm template k3d-payment-tracker charts/microservices/common \
 	-n microservices-dev -f charts/microservices/dev/payment-tracker/values.yaml
+```
+
+### Open Source Radar
+- App manifest: `argocd-apps/microservices/dev/opensource-radar/application.yaml`
+- Shared Helm chart: `charts/microservices/common`
+- Dev values: `charts/microservices/dev/opensource-radar/values.yaml`
+
+The open source radar runs as `k3d-opensource-radar` in `microservices-dev` and
+is available at `http://opensource-radar.localhost/` through Traefik. It serves
+the static dashboard on port 8080 and uses the namespace's `dockerhub-secret`
+for image pulls. The app is also exposed to the tailnet as `opensource-radar`.
+Its GitHub Actions workflow publishes the Docker image and updates the pinned
+image tag in the dev values after each push to `main`.
+
+Validate the chart locally:
+
+```bash
+helm lint charts/microservices/common \
+	-f charts/microservices/dev/opensource-radar/values.yaml
+helm template k3d-opensource-radar charts/microservices/common \
+	-n microservices-dev -f charts/microservices/dev/opensource-radar/values.yaml
 ```
 
 ### Private Tailscale Access
